@@ -1,0 +1,46 @@
+<%- include('partials/header') %>
+<div class="container">
+<% if (messages.error) { %>
+    <%= messages.error %>
+<% } %>
+
+<div class="forms-container">
+    <div class="signin-signup">
+        <form action="/login" method="post" class="sign-in-form">
+            <h2 class="title">Sign In</h2>
+            <div class="input-field">
+            <i class="fas fa-envelope"></i>
+            <input type="email" placeholder="Email" name="email" />
+            </div>
+            <div class="input-field">
+            <i class="fas fa-lock"></i>
+            <input type="password" placeholder="Password" name="password" />
+            </div>
+            <input type="submit" value="Login" class="btn solid" />
+
+            <p class="social-text">Or Sign in with social platforms</p>
+            <div class="social-media">
+            <a href="#" class="social-icon">
+                <i class="fab fa-facebook-f"></i>
+            </a>
+            <a href="#" class="social-icon">
+                <i class="fab fa-google"></i>
+            </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+    <div class="panels-container">
+        <div class="panel left-panel">
+            <div class="content">
+                <h3>New here?</h3>
+                <p>Join the Community</p>
+                <a href="register"><button class="btn transparent" id="sign-up-btn">Sign Up</button></a>
+            </div>
+            <img src="./img/log.svg" class="image" alt="">
+        </div>
+    </div>
+
+</div>
+<%- include('partials/footer') %>
