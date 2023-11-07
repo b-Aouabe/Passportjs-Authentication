@@ -6,6 +6,7 @@ const bodyParser = require("body-parser")
 const passport = require('passport')
 const flash = require('express-flash')
 const session = require('express-session')
+const findOrCreate = require("mongoose-findorcreate")
 
 
 //DB config:
@@ -14,8 +15,11 @@ mongoose.connect(process.env.DB_URL)
 
 const test_userSchema = new mongoose.Schema({
     username: {type: String, unique: true},
+    name: String,
+    googleId: String,
     password: String
 })
+test_userSchema.plugin(findOrCreate)
 
 
 const Test_user = mongoose.model('test_user', test_userSchema)
@@ -33,8 +37,8 @@ const initializePassport = require('./passport-config')
 initializePassport(
                 passport,
                 email => Test_user.findOne({username: email}),
-                id => Test_user.findById(id)
-                )
+                id => Test_user.findById(id),
+                Test_user)
 
 // const initializePassport = require('./passport-config')
 // initializePassport(
@@ -47,6 +51,8 @@ const app = express()
 
 app.set('view engine', 'ejs')
 app.use(express.static("public"))
+
+
 app.use(bodyParser.urlencoded({extended: true}))
 app.use(flash())
 app.use(session({
@@ -54,6 +60,8 @@ app.use(session({
     resave: false, //if nothing has changed don't resave the session variables
     saveUninitialized: false //don't save empty values
 }))
+
+
 app.use(passport.initialize())
 app.use(passport.session())
 
@@ -89,9 +97,9 @@ app.use(passport.session())
 //         res.redirect('/register')
 //     }
 // })
-
+let user;
 app.get('/', checkAuthenticated, (req, res) => {
-    res.render('index.ejs', { name: req.user.name })
+  res.render('index.ejs', { name: user.name })
   })
   
   app.get('/login', checkNotAuthenticated, (req, res) => {
@@ -99,10 +107,14 @@ app.get('/', checkAuthenticated, (req, res) => {
   })
   
   app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
-    successRedirect: '/',
     failureRedirect: '/login',
     failureFlash: true
-  }))
+  }),
+    (req, res)=>{
+      user = req.user
+      res.redirect('/')
+    }
+  )
   
   app.get('/register', checkNotAuthenticated,  (req, res) => {
     res.render('register')
@@ -113,6 +125,7 @@ app.get('/', checkAuthenticated, (req, res) => {
       const hashedPassword = await bcrypt.hash(req.body.password, 10) 
         const user = new Test_user({
             username: req.body.email,
+            name: req.body.name,
             password: hashedPassword
         })
         user.save().then(res.redirect('/login'));
@@ -127,7 +140,26 @@ app.get('/', checkAuthenticated, (req, res) => {
     })
     res.redirect('/login')
   })
+
+app.get('/auth/google', 
+  passport.authenticate('google', { scope: ["profile", "email"] })
+)
+
+app.get('/auth/google/check', 
+  passport.authenticate('google', { scope: ["profile", "email"] })
   
+)
+
+app.get('/auth/google/secrets1', 
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  (req, res) => {
+    // Successful Google authentication - handle the redirection here
+    user = req.user
+    console.log(`user: ${user}`)
+    res.redirect('/');
+  }
+)
+
   function checkAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
       return next()

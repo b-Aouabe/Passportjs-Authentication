@@ -1,7 +1,7 @@
 <%- include('partials/header') %>
 <div class="container">
 <% if (messages.error) { %>
-    <%= messages.error %>
+    <p style="color:#fff; background-color: red; position: absolute; top: 50%; right: 50%; z-index: 100;"><%= messages.error %></p>
 <% } %>
 
 <div class="forms-container">
@@ -23,7 +23,7 @@
             <a href="#" class="social-icon">
                 <i class="fab fa-facebook-f"></i>
             </a>
-            <a href="#" class="social-icon">
+            <a href="/auth/google" class="social-icon">
                 <i class="fab fa-google"></i>
             </a>
             </div>
